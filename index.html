@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Model Insight – Capability & Behavioral Analysis</title>
+  <meta name="description" content="Automated capability and behavioral analysis of models with bilingual (EN/中文) UI and in-page Markdown rendering for examples." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <!-- highlight.js for code blocks inside rendered Markdown -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github.min.css">
+  <style>
+    :root{
+      --bg: #0b1020;
+      --bg2: #0f1430;
+      --card: rgba(255,255,255,0.06);
+      --border: rgba(255,255,255,0.12);
+      --text: #e8ecf1;
+      --muted: #c4cede;
+      --accent: #7aa2ff;
+      --accent2: #a07bff;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial; color:var(--text);
+      background: radial-gradient(1200px 800px at 10% 10%, #1a2148 0%, transparent 60%),
+                  radial-gradient(900px 600px at 90% 20%, #232a5a 0%, transparent 60%),
+                  linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    }
+    .container{max-width:1100px;margin:0 auto;padding:24px}
+    header{
+      position:sticky;top:0;z-index:10;background:linear-gradient(180deg, rgba(11,16,32,.9), rgba(11,16,32,.6), transparent);
+      backdrop-filter: blur(8px);
+      border-bottom:1px solid var(--border);
+    }
+    .row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 6px 24px rgba(122,162,255,.4)}
+    .title{font-weight:800;letter-spacing:.3px}
+    .lang-toggle{display:flex;gap:6px;align-items:center;background:var(--card);border:1px solid var(--border);padding:6px;border-radius:999px}
+    .lang-toggle button{border:0;background:transparent;color:var(--muted);padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:600}
+    .lang-toggle button.active{background:linear-gradient(135deg, rgba(122,162,255,.15), rgba(160,123,255,.15)); color:#fff}
+
+    .hero{display:grid;grid-template-columns:1.1fr .9fr; gap:28px; margin-top:28px; align-items:center}
+    .kicker{color:var(--accent);font-weight:700;letter-spacing:.2px}
+    h1{font-size:clamp(28px,4.2vw,44px);margin:8px 0 10px;line-height:1.12}
+    .sub{color:var(--muted)}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px}
+    .hero img{width:100%;border-radius:16px;border:1px solid var(--border);box-shadow:0 12px 36px rgba(0,0,0,.25)}
+
+    .section{margin-top:40px}
+    .section h2{font-size:clamp(22px,3vw,28px);margin:0 0 14px}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr); gap:16px}
+
+    ul{margin:8px 0 0 18px}
+    li{margin:8px 0}
+    a{color:#c9d6ff; text-decoration:underline dotted; text-underline-offset:3px}
+    a.button{display:inline-block;text-decoration:none;background:linear-gradient(135deg, rgba(122,162,255,.18), rgba(160,123,255,.18));border:1px solid var(--border);padding:10px 14px;border-radius:10px;color:#fff}
+
+    /* Methodology cards */
+    .cols{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .tag{font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.03);color:var(--muted);display:inline-flex;gap:6px;align-items:center}
+
+    /* Modal for Markdown */
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(8,12,24,.7);backdrop-filter:blur(6px);z-index:50}
+    .modal.open{display:flex}
+    .modal-card{width:min(920px,92vw);max-height:84vh;overflow:auto;background:#0c1226;border:1px solid var(--border);border-radius:16px;box-shadow:0 18px 60px rgba(0,0,0,.4)}
+    .modal-head{position:sticky;top:0;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#0c1226,#0c132a)}
+    .modal-body{padding:18px}
+    .close{background:transparent;border:1px solid var(--border);color:var(--muted);padding:6px 10px;border-radius:10px;cursor:pointer}
+    .spinner{width:18px;height:18px;border:3px solid rgba(255,255,255,.18);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite;display:inline-block}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    footer{margin:48px 0 18px;color:var(--muted);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+    /* Responsive */
+    @media (max-width:900px){.hero{grid-template-columns:1fr}.grid,.cols{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container row">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div class="title">Model Insight</div>
+      </div>
+      <div class="lang-toggle" role="group" aria-label="language toggle">
+        <button id="btn-en" class="active" aria-pressed="true">EN</button>
+        <button id="btn-zh" aria-pressed="false">中文</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- HERO -->
+    <section class="hero">
+      <div>
+        <div class="kicker" id="kicker">Automated model analytics</div>
+        <h1 id="headline">Capability & Behavioral Analysis—Just Type a Query</h1>
+        <p class="sub" id="subhead">Get two natural-language reports from a single query: a capability analysis and a behavioral analysis—plus deep dives beyond raw performance.</p>
+        <div class="card" id="intro"></div>
+      </div>
+      <div>
+        <!-- Replace the PNG at assets/overview.png in your repo -->
+        <img id="hero-img" src="assets/overview.png" alt="Project overview image" loading="lazy">
+      </div>
+    </section>
+
+    <!-- HIGHLIGHTS -->
+    <section class="section">
+      <h2 id="highlights-title">Highlights</h2>
+      <div class="card">
+        <div id="highlights"></div>
+      </div>
+    </section>
+
+    <!-- METHODOLOGY -->
+    <section class="section">
+      <h2 id="method-title">Methodology</h2>
+      <div class="cols">
+        <div class="card">
+          <div class="tag">🔧 <span id="cap-tag">Capability Analysis</span></div>
+          <div id="capability"></div>
+        </div>
+        <div class="card">
+          <div class="tag">🧭 <span id="beh-tag">Behavioral Analysis</span></div>
+          <div id="behavioral"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick links row -->
+    <section class="section">
+      <div class="grid">
+        <div class="card">
+          <strong id="assets-title">Assets you provide</strong>
+          <ul id="assets"></ul>
+        </div>
+        <div class="card">
+          <strong id="tips-title">Tips</strong>
+          <ul id="tips"></ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="container">
+    <div>© <span id="year"></span> Model Insight</div>
+    <div>
+      <a class="button" href="#" id="deploy-how">How to deploy on GitHub Pages</a>
+    </div>
+  </footer>
+
+  <!-- Markdown Modal -->
+  <div id="md-modal" class="modal" aria-hidden="true" aria-labelledby="md-title">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div id="md-title">Document</div>
+        <div id="md-status" aria-live="polite"></div>
+        <button class="close" id="md-close" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body">
+        <article id="md-content" class="markdown-body"></article>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/common.min.js"></script>
+
+  <script>
+    // ------- i18n content (EN default) -------
+    const i18n = {
+      en: {
+        kicker: "Automated model analytics",
+        headline: "Capability & Behavioral Analysis—Just Type a Query",
+        subhead: "Get two natural-language reports from a single query: a capability analysis and a behavioral analysis—plus deep dives beyond raw performance.",
+        intro: `
+          <ul>
+            <li>🌟 This project is designed for the automated <strong>capability</strong> and <strong>behavioral</strong> analysis of models.
+              <ul>
+                <li><strong>Capability Analysis</strong>: Diverging from traditional quantitative evaluations, our project facilitates a <em>multi-dimensional</em> and <em>multi-level</em> comparison of model capabilities. It enables an in-depth exploration of metrics beyond performance, such as <em>token consumption</em> and <em>execution time</em>.</li>
+                <li><strong>Behavioral Analysis</strong>: By mining the models' behavior, we identify their <em>reasoning patterns</em>, substantiating their strengths and weaknesses.</li>
+              </ul>
+            </li>
+            <li>➡️ Users can obtain <strong>two natural-language reports</strong>—a capability analysis report and a behavioral analysis report—simply by inputting a single query.</li>
+            <li>📑 The detailed paper, benchmarks, and the system will be released soon. We welcome your attention and usage. ❤️</li>
+          </ul>
+        `,
+        highlightsTitle: "Highlights",
+        highlights: `
+          <ul>
+            <li><strong>Capability Differentiation and Correlation Analysis</strong>: We assess the discernible differences among models and the correlations between capabilities (e.g., simultaneous improvement or decline).<br>
+              <a href="#" class="example-link" data-file="examples/capability-correlation.md">[Example doc]</a>
+            </li>
+            <li><strong>Comparative Analysis of Non-Performance Metrics</strong>: Compare metrics such as consumed tokens, inference tokens, and latency/time.<br>
+              <a href="#" class="example-link" data-file="examples/non-performance-metrics.md">[Example doc: o3-high, o3-mini-high & GPT-4.1 Token Analysis]</a>
+            </li>
+            <li><strong>In-depth Analysis of Scalability</strong>: Fix a specific exercise and scale from 100 to 1000 cases, producing a comprehensive report.<br>
+              <a href="#" class="example-link" data-file="examples/scaling-analysis.md">[Example doc]</a>
+            </li>
+            <li><strong>Cross-Exercise Horizontal Comparison</strong>: Compare across 10–20 exercises for robust horizontal insights.<br>
+              <a href="#" class="example-link" data-file="examples/cross-exercise.md">[Example doc]</a>
+            </li>
+          </ul>
+        `,
+        methodTitle: "Methodology",
+        capTag: "Capability Analysis",
+        behTag: "Behavioral Analysis",
+        capability: `
+          <p>The process begins with a <strong>Coordinator</strong> agent that parses parameters from the user's query and invokes a <strong>Data Explorer</strong>. The Data Explorer retrieves data relevant to the query via tools.</p>
+          <p>Next, a <strong>Planner</strong>, guided by the data and the initial query, instructs an <strong>Analyzer</strong> to study the data from multiple perspectives. Findings are aggregated by a <strong>Reporter</strong> to produce a preliminary capability analysis report.</p>
+          <p>After a <strong>Checker</strong> verifies the report, a <strong>Summary</strong> module distills the core conclusions of the capability analysis.</p>
+        `,
+        behavioral: `
+          <p>Using the preliminary capability report and the user's initial query, a <strong>Case Strategy</strong> node generates multiple analysis tasks (per-model or multi-model).</p>
+          <p>Tasks are executed by a <strong>Case Analyzer</strong>, which flexibly selects relevant cases (including large batches &gt; 100) and produces detailed analyses. Once complete, a <strong>Case Reporter</strong> consolidates all results into a comprehensive case analysis report.</p>
+        `,
+        assetsTitle: "Assets you provide",
+        assets: [
+          "PNG image at <code>assets/overview.png</code> (shown above)",
+          "Markdown files in <code>examples/</code> (opened in a modal when you click the links)",
+          "Optional: a <code>CNAME</code> file if you use a custom domain"
+        ],
+        tipsTitle: "Tips",
+        tips: [
+          "Edit text or add more example links by modifying <code>index.html</code> only—no build step needed.",
+          "Default language is English. Your selection is saved to <code>localStorage</code>.",
+          "All links fetch Markdown from relative paths, which works on GitHub Pages."
+        ]
+      },
+      zh: {
+        kicker: "自动化模型分析",
+        headline: "能力分析与行为分析——只需输入一个查询",
+        subhead: "只需一次输入即可获得两份自然语言报告：能力分析报告与行为分析报告；并对性能之外的指标进行深度探索。",
+        intro: `
+          <ul>
+            <li>🌟 本项目用于对模型进行自动化的<strong>能力分析</strong>和<strong>行为分析</strong>。
+              <ul>
+                <li><strong>能力分析</strong>：不同于传统的定量评价，我们的项目可以对模型的能力进行多维多层级的比较，以及对除了性能之外的指标（如<em>消耗的 token 数量</em>、<em>运行时间</em>）进行深度探索。</li>
+                <li><strong>行为分析</strong>：通过对模型行为的挖掘，发现其<em>推理模式</em>，并具象化模型的优势与劣势。</li>
+              </ul>
+            </li>
+            <li>➡️ 你只需要输入一个 query，就可以得到两份<strong>自然语言报告</strong>：能力分析报告以及行为分析报告。</li>
+            <li>📑 具体论文、benchmark，以及系统即将放出，欢迎大家多多关注与使用 ❤️</li>
+          </ul>
+        `,
+        highlightsTitle: "亮点 case",
+        highlights: `
+          <ul>
+            <li>模型间的能力有没有区分度以及模型的能力之间有没有相关性（比如同涨、同跌）<br>
+              <a href="#" class="example-link" data-file="examples/capability-correlation.md">[示例文档]</a>
+            </li>
+            <li>对除性能之外的指标比较（比如消耗的 token 数、推理的 token 数、花费时间）<br>
+              <a href="#" class="example-link" data-file="examples/non-performance-metrics.md">[示例文档]</a>
+            </li>
+            <li>固定某个 exercise，分析 100 → 1000 个 case，输出一份报告<br>
+              <a href="#" class="example-link" data-file="examples/scaling-analysis.md">[示例文档]</a>
+            </li>
+            <li>横向对比 10～20 个 exercise<br>
+              <a href="#" class="example-link" data-file="examples/cross-exercise.md">[示例文档]</a>
+            </li>
+          </ul>
+        `,
+        methodTitle: "方法",
+        capTag: "能力分析",
+        behTag: "行为分析",
+        capability: `
+          <p>由 <strong>coordinator</strong> 解析 query 中的参数，并调用 <strong>data_explorer</strong>。data_explorer 调用工具获取 query 相关数据。</p>
+          <p><strong>planner</strong> 根据数据和 query 指导 <strong>analyzer</strong> 从不同角度分析数据，<strong>reporter</strong> 汇总生成能力分析报告。</p>
+          <p>经 <strong>checker</strong> 检验合格后输入 <strong>summary</strong>，获得能力分析报告的核心结论。</p>
+        `,
+        behavioral: `
+          <p>利用能力分析生成的初步报告和用户关注的问题（即最初的查询），由 <strong>case_Strategy</strong> 节点生成多个分析任务（单模型/多模型）。</p>
+          <p>将任务交给 <strong>case_analyzer</strong> 节点，灵活筛选相关案例（包含 &gt;100 的大批量案例），生成每个任务的详细分析报告。最终由 <strong>case reporter</strong> 节点汇总，生成综合案例分析报告。</p>
+        `,
+        assetsTitle: "需要你提供的素材",
+        assets: [
+          "放置一张 PNG 图片到 <code>assets/overview.png</code>（上方展示）",
+          "把示例 Markdown 文档放到 <code>examples/</code> 目录（点击链接后会在弹窗中自动渲染）",
+          "如需自定义域名，可添加 <code>CNAME</code> 文件"
+        ],
+        tipsTitle: "小贴士",
+        tips: [
+          "只需修改 <code>index.html</code> 即可完成大多数文案调整，无需构建流程。",
+          "默认语言为英文；语言选择会保存到 <code>localStorage</code>。",
+          "示例链接通过相对路径获取 Markdown，兼容 GitHub Pages。"
+        ]
+      }
+    };
+
+    // ------- populate content -------
+    const $ = sel => document.querySelector(sel);
+    const els = {
+      kicker: $('#kicker'), headline: $('#headline'), subhead: $('#subhead'), intro: $('#intro'),
+      highlightsTitle: $('#highlights-title'), highlights: $('#highlights'),
+      methodTitle: $('#method-title'), capability: $('#capability'), behavioral: $('#behavioral'),
+      capTag: $('#cap-tag'), behTag: $('#beh-tag'),
+      assetsTitle: $('#assets-title'), assets: $('#assets'),
+      tipsTitle: $('#tips-title'), tips: $('#tips'),
+      year: $('#year')
+    };
+
+    function renderLang(lang){
+      const t = i18n[lang];
+      els.kicker.textContent = t.kicker;
+      els.headline.textContent = t.headline;
+      els.subhead.textContent = t.subhead;
+      els.intro.innerHTML = t.intro;
+      els.highlightsTitle.textContent = t.highlightsTitle;
+      els.highlights.innerHTML = t.highlights;
+      els.methodTitle.textContent = t.methodTitle;
+      els.capTag.textContent = t.capTag;
+      els.behTag.textContent = t.behTag;
+      els.capability.innerHTML = t.capability;
+      els.behavioral.innerHTML = t.behavioral;
+      els.assetsTitle.textContent = t.assetsTitle;
+      els.assets.innerHTML = t.assets.map(x=>`<li>${x}</li>`).join('');
+      els.tipsTitle.textContent = t.tipsTitle;
+      els.tips.innerHTML = t.tips.map(x=>`<li>${x}</li>`).join('');
+
+      // Rebind example links after content swap
+      bindExampleLinks();
+    }
+
+    // ------- language toggle -------
+    const btnEn = document.getElementById('btn-en');
+    const btnZh = document.getElementById('btn-zh');
+    function setActive(btn){
+      [btnEn, btnZh].forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      btnEn.setAttribute('aria-pressed', btn===btnEn ? 'true':'false');
+      btnZh.setAttribute('aria-pressed', btn===btnZh ? 'true':'false');
+    }
+
+    btnEn.addEventListener('click',()=>{localStorage.setItem('lang','en'); setActive(btnEn); renderLang('en')});
+    btnZh.addEventListener('click',()=>{localStorage.setItem('lang','zh'); setActive(btnZh); renderLang('zh')});
+
+    // ------- Markdown modal -------
+    const modal = document.getElementById('md-modal');
+    const mdTitle = document.getElementById('md-title');
+    const mdStatus = document.getElementById('md-status');
+    const mdClose = document.getElementById('md-close');
+    const mdContent = document.getElementById('md-content');
+
+    function openMarkdown(path){
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden','false');
+      mdTitle.textContent = path.split('/').pop();
+      mdContent.innerHTML = '';
+      mdStatus.innerHTML = '<span class="spinner" aria-hidden="true"></span>';
+      fetch(path, {cache:'no-store'})
+        .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
+        .then(md=>{
+          mdStatus.textContent='';
+          const html = marked.parse(md, { gfm:true, breaks:true });
+          mdContent.innerHTML = html;
+          // syntax highlight
+          document.querySelectorAll('#md-content pre code').forEach(block=>{
+            try{ hljs.highlightElement(block); }catch(e){}
+          });
+        })
+        .catch(err=>{
+          mdStatus.textContent = 'Failed to load document (' + err.message + '). Make sure the file exists in your repo.';
+        });
+    }
+
+    function closeModal(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); }
+    mdClose.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e)=>{ if(e.target===modal) closeModal(); });
+    window.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && modal.classList.contains('open')) closeModal(); });
+
+    function bindExampleLinks(){
+      document.querySelectorAll('.example-link').forEach(a=>{
+        a.addEventListener('click', (e)=>{ e.preventDefault(); openMarkdown(a.getAttribute('data-file')); });
+      });
+    }
+
+    // Footer year
+    els.year.textContent = new Date().getFullYear();
+
+    // Deploy how-to (opens a small markdown help from an inline blob)
+    document.getElementById('deploy-how').addEventListener('click', (e)=>{
+      e.preventDefault();
+      const md = `# Deploy to GitHub Pages\n\n1. **Create a repo** on GitHub (e.g., \n   \`model-insight-site\`).\n2. Add these paths and files:\n\n   \n   - \`index.html\` (this file)\n   - \`assets/overview.png\` (your PNG)\n   - \`examples/capability-correlation.md\`\n   - \`examples/non-performance-metrics.md\`\n   - \`examples/scaling-analysis.md\`\n   - \`examples/cross-exercise.md\`\n\n3. **Commit & push** to the \`main\` branch.\n4. Go to **Settings → Pages**.\n   - Source: **Deploy from a branch**\n   - Branch: **main** / **root**\n   - Save.\n5. Wait 1–2 minutes, then open: \`https://<your-username>.github.io/<repo-name>/\`\n6. (Optional) For a custom domain, add a **CNAME** file and configure DNS.\n`;
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden','false');
+      mdTitle.textContent = 'GitHub Pages – Deployment Guide';
+      mdStatus.textContent = '';
+      mdContent.innerHTML = marked.parse(md);
+    });
+
+    // Initial render
+    const initial = localStorage.getItem('lang') || 'en';
+    if(initial==='zh'){ setActive(btnZh); renderLang('zh'); }
+    else { setActive(btnEn); renderLang('en'); }
+  </script>
+</body>
+</html>
