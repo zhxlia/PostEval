@@ -132,20 +132,6 @@
       </div>
     </section>
 
-    <!-- Quick links row -->
-    <section class="section">
-      <div class="grid">
-        <div class="card">
-          <strong id="assets-title">Assets you provide</strong>
-          <ul id="assets"></ul>
-        </div>
-        <div class="card">
-          <strong id="tips-title">Tips</strong>
-          <ul id="tips"></ul>
-        </div>
-      </div>
-    </section>
-
   </main>
 
   <footer class="container">
@@ -319,10 +305,10 @@
       els.behTag.textContent = t.behTag;
       els.capability.innerHTML = t.capability;
       els.behavioral.innerHTML = t.behavioral;
-      els.assetsTitle.textContent = t.assetsTitle;
-      els.assets.innerHTML = t.assets.map(x=>`<li>${x}</li>`).join('');
-      els.tipsTitle.textContent = t.tipsTitle;
-      els.tips.innerHTML = t.tips.map(x=>`<li>${x}</li>`).join('');
+      if (els.assetsTitle) { els.assetsTitle.textContent = t.assetsTitle; }
+      if (els.assets) { els.assets.innerHTML = (t.assets||[]).map(x=>`<li>${x}</li>`).join(''); }
+      if (els.tipsTitle) { els.tipsTitle.textContent = t.tipsTitle; }
+      if (els.tips) { els.tips.innerHTML = (t.tips||[]).map(x=>`<li>${x}</li>`).join(''); }
 
       // Rebind example links after content swap
       bindExampleLinks();
