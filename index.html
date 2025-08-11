@@ -136,9 +136,7 @@
 
   <footer class="container">
     <div>© <span id="year"></span> Model Insight</div>
-    <div>
-      <a class="button" href="#" id="deploy-how">How to deploy on GitHub Pages</a>
-    </div>
+    
   </footer>
 
   <!-- Markdown Modal -->
@@ -164,7 +162,7 @@
     const i18n = {
       en: {
         kicker: "Automated model analytics",
-        headline: "Capability & Behavioral Analysis—Just Type a Query",
+        headline: "Capability & Behavioral Analysis",
         subhead: "Get two natural-language reports from a single query: a capability analysis and a behavioral analysis—plus deep dives beyond raw performance.",
         intro: `
           <ul>
@@ -222,7 +220,7 @@
       },
       zh: {
         kicker: "自动化模型分析",
-        headline: "能力分析与行为分析——只需输入一个查询",
+        headline: "能力分析与行为分析",
         subhead: "只需一次输入即可获得两份自然语言报告：能力分析报告与行为分析报告；并对性能之外的指标进行深度探索。",
         intro: `
           <ul>
@@ -369,17 +367,6 @@
 
     // Footer year
     els.year.textContent = new Date().getFullYear();
-
-    // Deploy how-to (opens a small markdown help from an inline blob)
-    document.getElementById('deploy-how').addEventListener('click', (e)=>{
-      e.preventDefault();
-      const md = `# Deploy to GitHub Pages\n\n1. **Create a repo** on GitHub (e.g., \n   \`model-insight-site\`).\n2. Add these paths and files:\n\n   \n   - \`index.html\` (this file)\n   - \`assets/overview.png\` (your PNG)\n   - \`examples/capability-correlation.md\`\n   - \`examples/non-performance-metrics.md\`\n   - \`examples/scaling-analysis.md\`\n   - \`examples/cross-exercise.md\`\n\n3. **Commit & push** to the \`main\` branch.\n4. Go to **Settings → Pages**.\n   - Source: **Deploy from a branch**\n   - Branch: **main** / **root**\n   - Save.\n5. Wait 1–2 minutes, then open: \`https://<your-username>.github.io/<repo-name>/\`\n6. (Optional) For a custom domain, add a **CNAME** file and configure DNS.\n`;
-      modal.classList.add('open');
-      modal.setAttribute('aria-hidden','false');
-      mdTitle.textContent = 'GitHub Pages – Deployment Guide';
-      mdStatus.textContent = '';
-      mdContent.innerHTML = marked.parse(md);
-    });
 
     // Initial render
     const initial = localStorage.getItem('lang') || 'en';
